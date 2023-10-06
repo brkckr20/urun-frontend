@@ -21,7 +21,7 @@ function App() {
 
 
   useEffect(() => {
-    axios.get("http://localhost:3001/listele").then(({ data }) => {
+    axios.get("https://urun-backend.onrender.com/listele").then(({ data }) => {
       setLoading(true)
       setListe(data?.liste);
       setTutar(data?.toplam);
@@ -34,18 +34,18 @@ function App() {
 
   async function kaydet(e) {
     e.preventDefault();
-    const data = await axios.post("http://localhost:3001/ekle", { tarih, miktar, birim_fiyat })
+    const data = await axios.post("https://urun-backend.onrender.com/ekle", { tarih, miktar, birim_fiyat })
 
     live();
   }
 
   async function sil(id) {
-    const data = await axios.delete(`http://localhost:3001/sil/${id}`);
+    const data = await axios.delete(`https://urun-backend.onrender.com/sil/${id}`);
     live();
   }
 
   async function guncelle(id) {
-    await axios.put(`http://localhost:3001/guncelle/${id}`);
+    await axios.put(`https://urun-backend.onrender.com/guncelle/${id}`);
     // console.log("güncellendi");
   }
 
