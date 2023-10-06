@@ -21,13 +21,12 @@ function App() {
 
 
   useEffect(() => {
-    axios.get("https://urun-backend.onrender.com/listele").then(data => {
+    axios.get("http://localhost:3001/listele").then(({ data }) => {
       setLoading(true)
-      setListe(data?.data.data);
-      setTutar(data?.data.toplam);
+      setListe(data?.liste);
+      setTutar(data?.toplam);
       setLoading(false)
     }).catch(err => {
-      console.log(err)
       setLoading(false)
     });
   }, [yenile]);
@@ -35,13 +34,19 @@ function App() {
 
   async function kaydet(e) {
     e.preventDefault();
-    const data = await axios.post("https://urun-backend.onrender.com/ekle", { tarih, miktar, birim_fiyat })
+    const data = await axios.post("http://localhost:3001/ekle", { tarih, miktar, birim_fiyat })
+
     live();
   }
 
   async function sil(id) {
-    const data = await axios.delete(`https://urun-backend.onrender.com/sil/${id}`);
+    const data = await axios.delete(`http://localhost:3001/sil/${id}`);
     live();
+  }
+
+  async function guncelle(id) {
+    await axios.put(`http://localhost:3001/guncelle/${id}`);
+    // console.log("güncellendi");
   }
 
   function live() {
@@ -77,18 +82,23 @@ function App() {
                   <th scope="col">Miktar</th>
                   <th scope="col">Br.Fiyat</th>
                   <th scope="col">Tutar</th>
-                  <th scope="col" className='text-center'>Sil</th>
+                  <th scope="col" className='text-center'>İşlem</th>
                 </tr>
               </thead>
               <tbody>
+                {
+                  console.log(liste)
+                }
                 {loading ? <div className='text-white'>Yükleniyor</div> : (
                   liste.map(item => (
-                    <tr key={item.id}>
+                    <tr key={item.id} >
                       <th>{formatTarih(item.tarih)}</th>
                       <td>{item.miktar}</td>
                       <td>{formatter.format(item.birim_fiyat)}</td>
-                      <td>{formatter.format(item.tutar)}</td>
-                      <td className='text-center'><button onClick={() => sil(item.id)} type="button" className="btn btn-danger">Sil</button>
+                      <td className={`${item.tamamlandi === 'evet' && 'bg-success text-white'}`}>{formatter.format(item.tutar)}</td>
+                      <td className='text-center'>
+                        <button onClick={() => sil(item.id)} type="button" className="btn btn-sm btn-danger me-1">Sil</button>
+                        <button onClick={() => guncelle(item.id)} type="button" className="btn btn-sm btn-primary">Ok</button>
                       </td>
                     </tr>
                   ))
@@ -128,6 +138,13 @@ const formatter = new Intl.NumberFormat('tr-TR', {
 
 
 function formatTarih(tarih) {
-  const [yil, ay, gun] = tarih.split('-');
-  return `${gun}.${ay}.${yil}`;
+  const isoDate = new Date(tarih);
+  const day = isoDate.getDate(); // Gün
+  const month = isoDate.getMonth() + 1; // Ay (0-11 arasında, 1 eklememiz gerekiyor)
+  const year = isoDate.getFullYear(); // Yıl
+
+  // İstediğiniz formatta tarihi birleştirelim
+  const formattedResult = `${day}.${month}.${year}`;
+  return formattedResult
+
 }
